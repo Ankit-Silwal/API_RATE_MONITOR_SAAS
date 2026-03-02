@@ -15,3 +15,5 @@ export const connectDB=async ():Promise<void>=>{
     console.log(`Error connecting the database ${error}`);
   }
 }
+
+export default pool;
