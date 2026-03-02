@@ -1,5 +1,5 @@
 import {Request,Response} from "express"
-import { createOrganization } from "./organization.services"
+import { createOrganization, getUserOrganizations } from "./organization.services"
 type organizationtype={
   error?:string
   organizationId?:string
@@ -31,4 +31,18 @@ export async function createOrganizationController(
       error:"Failed to create organization"
     })
   }
+}
+
+export async function getOrganizationsController(
+  req:Request,
+  res:Response):Promise<Response<organizationtype>> {
+  if(!req.userId){
+    return res.status(401).json({
+      error:"Unauthorized"
+    })
+  }
+  const organizations=await getUserOrganizations(req.userId)
+  return res.json({
+    organizations
+  })
 }

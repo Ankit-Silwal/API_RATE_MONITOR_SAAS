@@ -24,4 +24,7 @@ export async function requireAuth(req:Request,res:Response,next:NextFunction):Pr
     res.status(401).json({error:"Invalid token sir"})
   }
 
-} 
+}
+
+
+

@@ -19,3 +19,17 @@ export async function createOrganization(name:string,clerkUserId:string):Promise
     `,[user.id,orgId])
   return orgId
 }
+
+export async function getUserOrganizations(clerkUserId:string){
+  const result=await pool.query(`
+    select o.id,o.name 
+    from organizations o
+    join organization_members om
+    on om.organization_id=o.id
+    join users u
+    on u.id=om.user_id
+    where u.clerk_users_id=$1
+  `,[clerkUserId])
+
+  return result.rows;
+}

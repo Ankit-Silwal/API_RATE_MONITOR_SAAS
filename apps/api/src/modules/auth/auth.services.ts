@@ -1,4 +1,4 @@
-import pool from "../../config/db";
+import {pool} from "../../config/db";
 
 export async function syncUser(clerkUserId:string,email:string):Promise<void>{
   const existing=await pool.query(
