@@ -19,6 +19,7 @@ export async function requireAuth(req:Request,res:Response,next:NextFunction):Pr
       secretKey:process.env.CLERK_SECRET_KEY as string
     })
     req.userId=payload.sub;
+    req.clerkPayLoad=payload;
     next()
   }catch{
     res.status(401).json({error:"Invalid token sir"})

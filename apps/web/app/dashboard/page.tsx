@@ -5,13 +5,20 @@ import { useEffect } from "react"
 
 export default function Dashboard()
 {
-  const { getToken } = useAuth()
+  const { getToken, isLoaded, userId } = useAuth()
 
   useEffect(() =>
   {
+    if (!isLoaded || !userId)
+    {
+      return
+    }
+
     async function sync()
     {
       const token = await getToken()
+
+      console.log("TOKEN:", token)
 
       await fetch("http://localhost:8000/auth/sync", {
         method: "POST",
@@ -22,7 +29,7 @@ export default function Dashboard()
     }
 
     sync()
-  }, [getToken])
+  }, [isLoaded, userId, getToken])
 
   return (
     <div>

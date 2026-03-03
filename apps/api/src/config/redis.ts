@@ -12,7 +12,7 @@ REDIS_CLIENT.on("ready",()=>{
   console.log("The Redis server has started")
 })
 
-export async function initReids():Promise<void> {
+export async function initRedis():Promise<void> {
   if(!REDIS_CLIENT.isOpen){
     REDIS_CLIENT.connect();
   }
