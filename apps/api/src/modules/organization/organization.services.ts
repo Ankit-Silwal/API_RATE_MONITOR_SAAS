@@ -28,7 +28,7 @@ export async function getUserOrganizations(clerkUserId:string){
     on om.organization_id=o.id
     join users u
     on u.id=om.user_id
-    where u.clerk_users_id=$1
+    where u.clerk_user_id=$1
   `,[clerkUserId])
 
   return result.rows;

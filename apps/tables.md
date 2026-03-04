@@ -31,3 +31,10 @@ create table api_usage_logs(
 	request_count integer not null,
 	recorded_at timestamp default current_timestamp
 );
+
+create table api_keys(
+	id uuid primary key default gen_random_uuid(),
+	api_id uuid references apis(id) on delete cascade,
+	key_hash text not null,
+	created_at timestamp default current_timestamp
+);

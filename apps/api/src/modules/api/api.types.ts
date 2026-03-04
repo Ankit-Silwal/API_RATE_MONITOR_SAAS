@@ -1,4 +1,4 @@
-export interface createApiBody{
+export interface CreateApiBody{
   name:string,
   baseUrl:string,
   rateLimit:number;
