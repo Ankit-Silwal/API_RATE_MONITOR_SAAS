@@ -2,22 +2,24 @@ import { pool } from "../../config/db";
 import { generateApiKeys } from "../../utils/generateApiKeys";
 import { hashApiKey } from "../../utils/hashApiKeys";
 
-export async function createApiKey(apiId:string){
-  const rawKey=generateApiKeys()
+export async function createApiKey(apiId: string)
+{
+  const { fullKey, prefix, secret } = generateApiKeys()
 
-  const keyHash=hashApiKey(rawKey);
+  const keyHash = await hashApiKey(secret)
 
-  const result=await pool.query(
+  const result = await pool.query(
     `
-      insert into api_keys (api_id,key_hash)
-      values ($1,$2)
-      returning id, created_at
-    `,[apiId,keyHash]
+    INSERT INTO api_keys (api_id, key_prefix, key_hash)
+    VALUES ($1,$2,$3)
+    RETURNING id, created_at
+    `,
+    [apiId, prefix, keyHash]
   )
 
-  return{
-    key:rawKey,
-    keyId:result.rows[0].id,
-    createdAt:result.rows[0].created_at
+  return {
+    key: fullKey,
+    keyId: result.rows[0].id,
+    createdAt: result.rows[0].created_at
   }
 }

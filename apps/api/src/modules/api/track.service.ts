@@ -8,57 +8,66 @@ type TrackInput={
   responseTime:number
 }
 
-export async function trackApiUsage(data:TrackInput){
-  const client=await pool.connect()
+export async function trackApiUsage(data: TrackInput)
+{
+  const client = await pool.connect()
 
-  try{
-    const keys=await client.query(
+  try
+  {
+    const parts = data.apiKey.split(".")
+    if (parts.length !== 2)
+    {
+      return null
+    }
+
+    const [prefix, secret] = parts
+
+    const result = await client.query(
       `
-      select id,api_id,key_hash
-      from api_keys
-      `
+      SELECT api_id, key_hash
+      FROM api_keys
+      WHERE key_prefix = $1
+      `,
+      [prefix]
     )
 
-
-
-
-    //NOT SCALABLE NEED TO WORK AGAIN TO MAKE IT SCABLE WILL UISE CONCEPTS
-    
-    
-    
-    
-    
-    let apiId:string | null=null
-    for(const key of keys.rows){
-      const match =await bcrypt.compare(data.apiKey,key.key_hash);
-
-      if(match){
-        apiId:key.api_id
-        break;
-      }
+    if (result.rows.length === 0)
+    {
+      return null
     }
-    if(!apiId){
-      return null;
+
+    const key = result.rows[0]
+
+    const match = await bcrypt.compare(secret, key.key_hash)
+
+    if (!match)
+    {
+      return null
     }
+
     await client.query(
       `
-      insert into api_usage_logs(
+      INSERT INTO api_usage_logs
+      (
         api_id,
         endpoint,
         status_code,
         response_time
       )
-        values ($1,$2,$3,$4)
-      `,[
-        apiId,
+      VALUES ($1,$2,$3,$4)
+      `,
+      [
+        key.api_id,
         data.endpoint,
         data.status,
         data.responseTime
       ]
     )
+
     return true
-  }finally{
+  }
+  finally
+  {
     client.release()
   }
-
 }

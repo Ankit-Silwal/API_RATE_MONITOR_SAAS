@@ -2,38 +2,54 @@ import { Request,Response } from "express";
 import { trackApiUsage } from "./track.service";
 
 export async function trackUsageController(
-  req:Request,
-  res:Response
-){
-  try{
-    const apiKey=req.headers["x-api-key"] as string
-    
-    if(!apiKey){
-      return res.status(400).json({
-        message:"API key missing"
+  req: Request,
+  res: Response
+)
+{
+  try
+  {
+    const apiKeyHeader = req.headers["x-api-key"]
+
+    if (!apiKeyHeader || typeof apiKeyHeader !== "string")
+    {
+      return res.status(401).json({
+        message: "API key missing"
       })
     }
-    const {endpoint,status,response_time}=req.body;
+    const apiKey = apiKeyHeader
+    const { endpoint, status, response_time } = req.body
 
-    const result=await trackApiUsage({
+    if (!endpoint || typeof status !== "number" || typeof response_time !== "number")
+    {
+      return res.status(400).json({
+        message: "Invalid request payload"
+      })
+    }
+
+    const result = await trackApiUsage({
       apiKey,
       endpoint,
       status,
-      responseTime:response_time
+      responseTime: response_time
     })
-    if(!result){
+
+    if (!result)
+    {
       return res.status(401).json({
-        message:"Invalid API key"
+        message: "Invalid API key"
       })
     }
+
     return res.status(200).json({
-      message:"Usage logged"
-    })
-  }catch(err){
-    console.error(err)
-    return res.status(500).json({
-      message:"Tracking failed"
+      message: "Usage logged"
     })
   }
+  catch (err)
+  {
+    console.error(err)
 
+    return res.status(500).json({
+      message: "Tracking failed"
+    })
+  }
 }
