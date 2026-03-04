@@ -28,7 +28,6 @@ create table apis(
 create table api_usage_logs(
 	id uuid primary key default gen_random_uuid(),
 	api_id uuid references apis(id) on delete cascade,
-	request_count integer not null,
 	recorded_at timestamp default current_timestamp
 );
 ALTER TABLE api_usage_logs
@@ -36,6 +35,11 @@ ADD COLUMN endpoint TEXT,
 ADD COLUMN status_code INT,
 ADD COLUMN response_time INT;
 
+CREATE INDEX idx_api_usage_api_id
+ON api_usage_logs(api_id);
+
+CREATE INDEX idx_api_usage_logs_recorded_at
+ON api_usage_logs(recorded_at);
 
 create table api_keys(
 	id uuid primary key default gen_random_uuid(),
