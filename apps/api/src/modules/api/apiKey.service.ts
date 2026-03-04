@@ -11,6 +11,7 @@ export async function createApiKey(apiId:string){
     `
       insert into api_keys (api_id,key_hash)
       values ($1,$2)
+      returning id, created_at
     `,[apiId,keyHash]
   )
 

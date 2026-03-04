@@ -31,6 +31,11 @@ create table api_usage_logs(
 	request_count integer not null,
 	recorded_at timestamp default current_timestamp
 );
+ALTER TABLE api_usage_logs
+ADD COLUMN endpoint TEXT,
+ADD COLUMN status_code INT,
+ADD COLUMN response_time INT;
+
 
 create table api_keys(
 	id uuid primary key default gen_random_uuid(),

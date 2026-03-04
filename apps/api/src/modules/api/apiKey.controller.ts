@@ -12,7 +12,7 @@ export async function generateApiKeyController(
     return res.status(200).json({
       message:"APi key generated",
       apiKey:result.key,
-      keyId:result.keyId,
+      keyId:result.keyId, 
       createdAt:result.createdAt
     })
   }catch(err){
