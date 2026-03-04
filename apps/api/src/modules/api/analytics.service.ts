@@ -38,3 +38,19 @@ export async function getApiStats(apiId: string)
     p99Latency: row.p99_latency ? Number(row.p99_latency) : 0
   }
 }
+
+export async function getEndPointUsage(apiId:string) {
+  const result=await pool.query(`
+      select endpoint,
+      count(*) as requests
+      from api_usage_logs
+      where api_id=$1
+      group by endpoint
+      order by request desc
+    `,[apiId])
+
+    return result.rows.map((row)=>({
+      endpoint:row.endpoint,
+      requests:Number(row.requests)
+    }))
+}

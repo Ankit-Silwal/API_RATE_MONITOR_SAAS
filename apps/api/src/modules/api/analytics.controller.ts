@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getApiStats } from "./analytics.service";
+import { getApiStats, getEndPointUsage } from "./analytics.service";
 
 export async function getApiStatsController(req:Request<{apiId:string}>,res:Response){
   try{
@@ -13,4 +13,15 @@ export async function getApiStatsController(req:Request<{apiId:string}>,res:Resp
       message:"Failed to fetch stats"
     })
   }
+}
+
+
+export async function getEndPointUsageController(
+  req:Request<{apiId:string}>,
+  res:Response
+){
+  const {apiId}=req.params;
+
+  const data=await getEndPointUsage(apiId)
+  return res.status(200).json(data)
 }
