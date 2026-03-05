@@ -54,3 +54,21 @@ export async function getEndPointUsage(apiId:string) {
       requests:Number(row.requests)
     }))
 }
+
+
+export async function getRequestsPerMinute(apiId:string) {
+  const result=await pool.query(
+    `
+    select data_trunc('minute',recorded_at) as minute,
+    count(*) as requests
+    from api_usage_logs
+    where api_id=$1
+    group by minute
+    order by minute
+    `,[apiId]
+  )
+  return result.rows.map((row)=>({
+    minute:row.minute,
+    requests:Number(row.requests)
+  }))
+}

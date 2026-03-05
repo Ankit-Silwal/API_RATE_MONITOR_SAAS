@@ -3,7 +3,7 @@ import { Router } from "express";
 import { requireAuth } from "../../middleware/auth";
 import { generateApiKeyController } from "./apiKey.controller";
 import { trackUsageController } from "./track.controller";
-import { getApiStatsController, getEndPointUsageController } from "./analytics.controller";
+import { getApiStatsController, getEndPointUsageController, getRequestPerMinuteController } from "./analytics.controller";
 
 const router=Router();
 
@@ -18,5 +18,6 @@ router.post("/track",requireAuth,trackUsageController)
 router.get('/:apiId/stats',requireAuth,getApiStatsController);
 router.get('/:apiId/endpoints',getEndPointUsageController)
 
+router.get("/:apiId/rpm",getRequestPerMinuteController)
 
 export default router;
