@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
 import { getApiStats, getEndPointUsage, getRequestsPerMinute } from "./analytics.service";
 
-export async function getApiStatsController(req:Request,res:Response){
+export async function getApiStatsController(
+  req:Request<{apiId:string},{},{},{range?:string}>
+  ,res:Response){
   try{
     const apiId = req.api!.id;
-    const stats = await getApiStats(apiId);
+    const {range}=req.query
+    const stats = await getApiStats(apiId,range);
 
     return res.status(200).json(stats);
   } catch(error){

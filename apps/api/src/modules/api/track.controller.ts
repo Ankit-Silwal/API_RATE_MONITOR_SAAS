@@ -40,6 +40,12 @@ export async function trackUsageController(
       })
     }
 
+    if(result==="Rate_Limited"){
+      return res.status(429).json({
+        message:"Rate limit exceeded"
+      })
+    }
+
     return res.status(200).json({
       message: "Usage logged"
     })

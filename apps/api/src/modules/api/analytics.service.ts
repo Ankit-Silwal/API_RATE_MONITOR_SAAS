@@ -1,6 +1,8 @@
 import { pool } from "../../config/db"
-export async function getApiStats(apiId: string)
+import { getTimeRange } from "../../utils/timeRange"
+export async function getApiStats(apiId: string,range?:string)
 {
+  const timeCondition=getTimeRange(range)
   const result = await pool.query(
     `
     SELECT
@@ -19,6 +21,7 @@ export async function getApiStats(apiId: string)
 
     FROM api_usage_logs
     WHERE api_id = $1
+    and recorded_at > ${timeCondition}
     `,
     [apiId]
   )

@@ -1,7 +1,7 @@
 import { pool } from "../../config/db";
 import bcrypt from "bcrypt"
 import { getIo } from "../../socket";
-
+import { checkRateLimit } from "../../utils/redisLimiter";
 
 type TrackInput={
   apiKey:string,
@@ -16,6 +16,7 @@ export async function trackApiUsage(data: TrackInput)
 
   try
   {
+    
     const parts = data.apiKey.split(".")
     if (parts.length !== 2)
     {
@@ -45,6 +46,11 @@ export async function trackApiUsage(data: TrackInput)
     if (!match)
     {
       return null
+    }
+
+    const allowed=await checkRateLimit(data.apiKey,100)
+    if(!allowed){
+      return "Rate_Limited"
     }
 
     await client.query(
