@@ -1,52 +1,315 @@
-# Turborepo starter
+# API Rate Monitor SaaS
 
-This Turborepo starter is maintained by the Turborepo core team.
+A full-stack SaaS application for monitoring API usage, tracking performance metrics, and analyzing endpoint behavior in real-time.
 
-## Using this example
+## 🚀 Overview
 
-Run the following command:
+API Rate Monitor helps developers and teams track their API usage, monitor performance, and gain insights into their API behavior. Built with a modern tech stack and designed for scalability.
 
-```sh
-npx create-turbo@latest
+## 📦 Monorepo Structure
+
+This is a Turborepo monorepo containing the following applications and packages:
+
+### Apps
+
+- **`api`**: Node.js/Express backend API server
+  - Authentication with Clerk
+  - PostgreSQL database
+  - Redis for caching
+  - Socket.IO for real-time updates
+  - [📖 View Backend Documentation](./apps/api/README.md)
+  
+- **`web`**: Next.js frontend application
+  - React-based UI
+  - Server-side rendering
+  - Authentication with Clerk
+  - Real-time dashboard
+
+### Packages
+
+- **`@repo/ui`**: Shared React component library
+  - Button, Card, Code components
+  - Reusable across applications
+  
+- **`@repo/eslint-config`**: Shared ESLint configurations
+  - Base config
+  - Next.js config
+  - React internal config
+  
+- **`@repo/typescript-config`**: Shared TypeScript configurations
+  - Base config
+  - Next.js config
+  - React library config
+
+## ✨ Features
+
+- 🔐 **Secure Authentication**: Clerk-based authentication system
+- 👥 **Multi-tenant Support**: Organization and team management
+- 🔑 **API Key Management**: Generate and manage secure API keys
+- 📊 **Usage Tracking**: Real-time API usage logging
+- 📈 **Analytics Dashboard**: Performance metrics and insights
+- ⚡ **Real-time Updates**: WebSocket-based live data
+- 🗄️ **Robust Storage**: PostgreSQL for reliability
+- 🚀 **High Performance**: Redis caching layer
+
+## 🛠 Tech Stack
+
+### Backend
+- Node.js + TypeScript
+- Express.js
+- PostgreSQL
+- Redis
+- Socket.IO
+- Clerk
+- bcrypt
+
+### Frontend
+- Next.js 14+
+- React
+- TypeScript
+- Tailwind CSS (planned)
+- Clerk
+
+### DevOps
+- Turborepo for monorepo management
+- pnpm for package management
+- ESLint for code quality
+- TypeScript for type safety
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18+)
+- pnpm (v8+)
+- PostgreSQL (v14+)
+- Redis (v6+)
+- Clerk account
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd API_RATE_MONITOR_SAAS
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
+
+3. **Set up environment variables**
+   
+   For the backend:
+   ```bash
+   cd apps/api
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+   For the frontend:
+   ```bash
+   cd apps/web
+   cp .env.example .env.local
+   # Edit .env.local with your configuration
+   ```
+
+4. **Set up the database**
+   ```bash
+   # Create PostgreSQL database
+   psql -U postgres
+   CREATE DATABASE api_rate_monitor;
+   
+   # Run migrations (from apps/tables.md)
+   psql -U postgres -d api_rate_monitor -f apps/tables.sql
+   ```
+
+5. **Start development servers**
+   
+   From the root directory:
+   ```bash
+   # Start all apps in development mode
+   pnpm dev
+   ```
+   
+   Or start individually:
+   ```bash
+   # Backend only
+   cd apps/api
+   pnpm dev
+   
+   # Frontend only
+   cd apps/web
+   pnpm dev
+   ```
+
+### Access the Application
+
+- **Backend API**: http://localhost:8000
+- **Frontend**: http://localhost:3000
+- **Health Check**: http://localhost:8000/health
+
+## 📚 Documentation
+
+Comprehensive documentation is available for each component:
+
+### Backend Documentation
+- [Backend README](./apps/api/README.md) - Quick start and overview
+- [Backend API Documentation](./apps/api/BACKEND_DOCUMENTATION.md) - Complete API reference
+- [API Quick Reference](./apps/api/API_QUICK_REFERENCE.md) - Quick lookup guide
+- [Architecture Guide](./apps/api/ARCHITECTURE.md) - System design and patterns
+
+### Database
+- [Database Schema](./apps/tables.md) - Table definitions and relationships
+
+## 🏗️ Project Structure
+
+```
+API_RATE_MONITOR_SAAS/
+├── apps/
+│   ├── api/                    # Backend API server
+│   │   ├── src/
+│   │   │   ├── config/        # Configuration files
+│   │   │   ├── middleware/    # Express middleware
+│   │   │   ├── modules/       # Feature modules
+│   │   │   ├── types/         # TypeScript types
+│   │   │   ├── utils/         # Utility functions
+│   │   │   └── socket.ts      # WebSocket setup
+│   │   ├── index.ts           # Entry point
+│   │   ├── app.ts             # Express config
+│   │   └── routes.ts          # Route registration
+│   │
+│   ├── web/                    # Frontend application
+│   │   ├── app/               # Next.js app directory
+│   │   └── public/            # Static assets
+│   │
+│   └── tables.md              # Database schema
+│
+├── packages/
+│   ├── ui/                     # Shared UI components
+│   ├── eslint-config/          # Shared ESLint config
+│   └── typescript-config/      # Shared TS config
+│
+├── package.json                # Root package.json
+├── pnpm-workspace.yaml         # pnpm workspace config
+└── turbo.json                  # Turborepo config
 ```
 
-## What's inside?
+## 🔧 Development
 
-This Turborepo includes the following packages/apps:
+### Building
 
-### Apps and Packages
+Build all apps and packages:
+```bash
+pnpm build
+```
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+Build specific app:
+```bash
+pnpm --filter api build
+pnpm --filter web build
+```
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Linting
 
-### Utilities
+```bash
+pnpm lint
+```
 
-This Turborepo has some additional tools already setup for you:
+### Type Checking
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+```bash
+pnpm type-check
+```
 
-### Build
-
-To build all apps and packages, run the following command:
+## 📊 API Endpoints Overview
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+GET    /health                  # Health check
+POST   /auth/sync               # Sync user from Clerk
+POST   /organizations           # Create organization
+GET    /organizations           # List organizations
+POST   /api                     # Create API
+GET    /api                     # List APIs
+POST   /api/:apiId/keys         # Generate API key
+POST   /api/track               # Track API usage
+GET    /api/:apiId/stats        # Get statistics
+GET    /api/:apiId/endpoints    # Endpoint usage
+GET    /api/:apiId/rpm          # Requests per minute
 ```
+
+See [API Quick Reference](./apps/api/API_QUICK_REFERENCE.md) for detailed documentation.
+
+## 🗄️ Database Schema
+
+### Core Tables
+- `users` - User accounts (synced from Clerk)
+- `organizations` - Organization management
+- `organization_members` - User-org relationships
+- `apis` - API configurations
+- `api_keys` - Hashed API keys
+- `api_usage_logs` - Usage metrics
+
+See [Database Schema](./apps/tables.md) for complete details.
+
+## 🔮 Roadmap
+
+### Backend
+- [ ] Implement rate limiting enforcement
+- [ ] Add Redis caching layer
+- [ ] Real-time dashboard updates
+- [ ] Alert system for threshold violations
+- [ ] API key rotation
+- [ ] Comprehensive testing suite
+
+### Frontend
+- [ ] Dashboard with real-time metrics
+- [ ] API management interface
+- [ ] Organization management UI
+- [ ] Analytics visualizations
+- [ ] Alert configuration UI
+
+### DevOps
+- [ ] CI/CD pipeline
+- [ ] Docker containerization
+- [ ] Kubernetes deployment
+- [ ] Monitoring and logging
+- [ ] Load testing
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Follow existing code patterns
+4. Add tests for new features
+5. Update documentation
+6. Submit a pull request
+
+## 📄 License
+
+[Add your license here]
+
+## 🙏 Acknowledgments
+
+- [Turborepo](https://turborepo.org/) for monorepo management
+- [Next.js](https://nextjs.org/) for the frontend framework
+- [Clerk](https://clerk.com/) for authentication
+- [PostgreSQL](https://www.postgresql.org/) for database
+- [Express.js](https://expressjs.com/) for the backend framework
+
+## 📞 Support
+
+For questions or issues:
+- Check the documentation in the respective app folders
+- Open an issue on GitHub
+- Contact the development team
+
+---
+
+**Built with ❤️ for developers who need reliable API monitoring**
 
 You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
 
