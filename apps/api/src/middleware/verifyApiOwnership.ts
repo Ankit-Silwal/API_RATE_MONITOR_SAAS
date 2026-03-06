@@ -7,26 +7,26 @@ export async function verifyApiOwnership(
   next:NextFunction
 ){
   try{
-    const {apiId}=req.params
+    const apiId = req.params.apiId || req.params.id;
+    const userId = req.userId;
 
-    const userId=req.userId
+    const result = await pool.query(
+      `SELECT id, name, base_url FROM apis WHERE id = $1 AND user_id = $2`,
+      [apiId, userId]
+    );
 
-    const result=await pool.query(`
-      select id from apis
-      where id=$1
-      and user_id=$2
-      `,[apiId,userId]
-    )
-    if(result.rows.length===0){
+    if(result.rows.length === 0){
       return res.status(403).json({
         message:"Access denied"
-      })
+      });
     }
-    next()
+
+    req.api = result.rows[0];
+    next();
   }catch(err){
-    console.error(err)
+    console.error(err);
     return res.status(500).json({
-      message:"Authorization failed nigga"
-    })
+      message:"Authorization failed"
+    });
   }
 }

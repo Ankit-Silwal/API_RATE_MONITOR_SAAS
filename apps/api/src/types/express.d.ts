@@ -4,7 +4,12 @@ declare global{
   namespace Express{
     interface Request{
       userId?:string,
-      clerkPayLoad?:JwtPayload
+      clerkPayLoad?:JwtPayload,
+      api?:{
+        id:string,
+        name:string,
+        base_url:string
+      }
     }
   }
 }

@@ -68,41 +68,31 @@ export const getApiController=async (req:Request,res:Response)=>{
 }
 
 export const deleteApiController=async (
-  req:Request<{id:string}>,
+  req:Request,
   res:Response
 )=>{
   if(!req.userId){
     res.status(401).json({
       message:"Unauthorized"
-    })
+    });
     return;
   }
   
-  // Get internal user UUID from Clerk ID
-  const internalUserId = await getUserIdFromClerkId(req.userId);
-  if(!internalUserId){
-    res.status(404).json({
-      message:"User not found"
-    })
-    return;
-  }
-  
-  const {id}=req.params;
+  const apiId = req.api!.id;
 
   const result=await pool.query(
-    `
-      delete from apis
-      where id=$1 and user_id=$2 
-      returning id   
-    `,[id,internalUserId]
-  )
+    `DELETE FROM apis WHERE id = $1 RETURNING id`,
+    [apiId]
+  );
+
   if(!result.rows.length){
     res.status(404).json({
       message:"API not found"
-    })
-    return
+    });
+    return;
   }
+
   res.status(200).json({
     message:"API deleted"
-  })
+  });
 }
