@@ -1,5 +1,7 @@
 import { pool } from "../../config/db";
 import bcrypt from "bcrypt"
+import { getIo } from "../../socket";
+
 
 type TrackInput={
   apiKey:string,
@@ -63,6 +65,16 @@ export async function trackApiUsage(data: TrackInput)
         data.responseTime
       ]
     )
+
+    const io=getIo();
+
+    io.emit("api_usage",{
+      apiId:key.api_id,
+      endpoint:data.endpoint,
+      status:data.status,
+      responseTime:data.responseTime,
+      timestamp:new Date()
+    })
 
     return true
   }
