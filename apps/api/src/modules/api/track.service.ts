@@ -2,6 +2,7 @@ import { pool } from "../../config/db";
 import bcrypt from "bcrypt"
 import { getIo } from "../../socket";
 import { checkRateLimit } from "../../utils/redisLimiter";
+import { sendUsageEvent } from "../../services/kafkaProducer";
 
 type TrackInput={
   apiKey:string,
@@ -57,24 +58,13 @@ export async function trackApiUsage(data: TrackInput)
       return "Rate_Limited"
     }
 
-    await client.query(
-      `
-      INSERT INTO api_usage_logs
-      (
-        api_id,
-        endpoint,
-        status_code,
-        response_time
-      )
-      VALUES ($1,$2,$3,$4)
-      `,
-      [
-        key.api_id,
-        data.endpoint,
-        data.status,
-        data.responseTime
-      ]
-    )
+    await sendUsageEvent({
+      apiId:key.api_id,
+      endpoint:data.endpoint,
+      status:data.status,
+      responseTime:data.responseTime,
+      timestamp:new Date()
+    })
 
     const io=getIo();
 
