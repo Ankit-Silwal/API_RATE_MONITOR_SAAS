@@ -27,9 +27,13 @@ export async function trackApiUsage(data: TrackInput)
 
     const result = await client.query(
       `
-      SELECT api_id, key_hash
-      FROM api_keys
-      WHERE key_prefix = $1
+      select k.api_id,
+      k.key_hash,
+      a.rate_limit
+      from api_keys k
+      join apis a 
+      on k.api_id=a.id
+      where k.key_prefix=$1
       `,
       [prefix]
     )
@@ -48,7 +52,7 @@ export async function trackApiUsage(data: TrackInput)
       return null
     }
 
-    const allowed=await checkRateLimit(data.apiKey,100)
+    const allowed=await checkRateLimit(data.apiKey,key.rate_limit)
     if(!allowed){
       return "Rate_Limited"
     }

@@ -274,7 +274,9 @@ DB: Find by prefix
      ↓
 bcrypt.compare(secret, hash)
      ↓
-If valid: Insert usage log
+Redis rate check using API rate_limit
+  ↓
+If allowed: Insert usage log
      ↓
 Response: Usage logged
 ```
@@ -705,7 +707,7 @@ const config = {
 ### Short Term
 - [ ] Add request validation middleware (express-validator)
 - [ ] Implement Redis caching for frequently accessed data
-- [ ] Add rate limiting middleware
+- [ ] Improve rate limiting strategy (sliding windows/burst controls)
 - [ ] Set up structured logging (Winston/Pino)
 
 ### Medium Term

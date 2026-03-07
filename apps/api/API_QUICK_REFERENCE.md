@@ -8,10 +8,12 @@ http://localhost:8000
 ```
 
 ## Authentication
-All protected endpoints require:
+Protected management and analytics endpoints require:
 ```
 Authorization: Bearer <clerk-jwt-token>
 ```
+
+`POST /api/track` uses `x-api-key` and does not require a bearer token.
 
 ---
 
@@ -52,6 +54,10 @@ Header: x-api-key: <generated-key>
 Body: { endpoint, status, response_time }
 ```
 
+Notes:
+- Enforces Redis-backed per-API `rate_limit`
+- Returns `429` when the limit is exceeded
+
 ### Analytics
 ```http
 GET    /api/:apiId/stats                 # Get API statistics
@@ -85,7 +91,6 @@ curl -X POST http://localhost:8000/api/<apiId>/keys \
 ```bash
 curl -X POST http://localhost:8000/api/track \
   -H "x-api-key: ak_live_abc123.def456..." \
-  -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
     "endpoint": "/users/profile",
@@ -108,6 +113,7 @@ curl http://localhost:8000/api/<apiId>/stats \
 - `201` - Created
 - `400` - Bad Request
 - `401` - Unauthorized
+- `429` - Rate Limit Exceeded
 - `404` - Not Found
 - `500` - Internal Server Error
 

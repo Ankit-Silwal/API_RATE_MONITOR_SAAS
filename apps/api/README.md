@@ -23,7 +23,7 @@ A robust Node.js backend service for monitoring API usage, tracking performance 
 - 📈 **Analytics**: Real-time statistics and performance metrics
 - ⚡ **WebSocket Support**: Ready for real-time updates
 - 🗄️ **PostgreSQL**: Robust data persistence
-- 🚀 **Redis Ready**: Configured for caching and rate limiting
+- 🚀 **Redis Backed Limiting**: Per-API rate limits enforced during usage tracking
 
 ## 🛠 Tech Stack
 
@@ -238,7 +238,6 @@ The system tracks:
 
 ## 🔮 Roadmap
 
-- [ ] Implement rate limiting enforcement
 - [ ] Add Redis caching layer
 - [ ] Real-time dashboard updates via WebSocket
 - [ ] Alert system for threshold violations
@@ -252,9 +251,8 @@ The system tracks:
 ## 🐛 Known Issues
 
 1. **Authentication bypass in development**: Token verification is currently commented out
-2. **Redis not utilized**: Configured but not integrated
-3. **No rate limiting enforcement**: Rate limits stored but not enforced
-4. **API key management**: Cannot list or revoke keys yet
+2. **Redis usage is partial**: Currently used for rate limiting but not for caching
+3. **API key management**: Cannot list or revoke keys yet
 
 See [BACKEND_DOCUMENTATION.md](./BACKEND_DOCUMENTATION.md#known-issues--todos) for complete list and production checklist.
 

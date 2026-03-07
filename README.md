@@ -256,7 +256,7 @@ See [Database Schema](./apps/tables.md) for complete details.
 ## 🔮 Roadmap
 
 ### Backend
-- [ ] Implement rate limiting enforcement
+- [x] Enforce per-API rate limiting on usage tracking
 - [ ] Add Redis caching layer
 - [ ] Real-time dashboard updates
 - [ ] Alert system for threshold violations

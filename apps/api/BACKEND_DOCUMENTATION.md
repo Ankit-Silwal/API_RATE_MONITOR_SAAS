@@ -377,7 +377,10 @@ Logs API usage for analytics.
 
 **Headers:**
 - `x-api-key: <api-key>`
-- `Authorization: Bearer <token>`
+
+**Notes:**
+- Uses API-key authentication for tracking (no bearer token required)
+- Enforces Redis-backed per-API `rate_limit` before inserting usage logs
 
 **Request Body:**
 ```json
@@ -395,10 +398,18 @@ Logs API usage for analytics.
 }
 ```
 
+**When Rate Limit Is Exceeded:**
+```json
+{
+  "message": "Rate limit exceeded"
+}
+```
+
 **Status Codes:**
 - 200: Success
 - 400: Invalid payload
 - 401: Invalid API key
+- 429: Rate limit exceeded
 - 500: Server error
 
 **Validation:**
@@ -406,7 +417,8 @@ Logs API usage for analytics.
 2. Splits key into prefix and secret
 3. Looks up key by prefix
 4. Verifies secret with bcrypt
-5. Logs usage to database
+5. Enforces API `rate_limit` with Redis before logging
+6. Logs usage to database
 
 ---
 
@@ -749,20 +761,17 @@ Starts the server with:
 
 1. **Authentication Bypass**: The `requireAuth` middleware has token verification commented out with a hardcoded user ID for development.
 
-2. **Missing Rate Limiting**: While APIs have a `rate_limit` field, enforcement is not implemented.
+2. **No API Key Listing**: Cannot retrieve or revoke existing API keys.
 
-3. **No API Key Listing**: Cannot retrieve or revoke existing API keys.
+3. **Limited WebSocket Usage**: Socket.IO is configured but not actively used for real-time features.
 
-4. **Limited WebSocket Usage**: Socket.IO is configured but not actively used for real-time features.
-
-5. **Redis Not Utilized**: Redis client is configured but not integrated into any services.
+4. **Redis Used Minimally**: Redis currently backs rate limiting but is not yet used for caching.
 
 ### Production Checklist
 
 - [ ] Enable Clerk token verification
-- [ ] Implement rate limiting middleware
 - [ ] Add API key management endpoints (list, revoke)
-- [ ] Integrate Redis for caching and rate limiting
+- [ ] Expand Redis usage for response/query caching
 - [ ] Add request validation middleware
 - [ ] Implement comprehensive error logging
 - [ ] Add database migrations system
@@ -785,7 +794,7 @@ The system tracks response times in milliseconds for each API call. This data is
 
 1. **Real-time Dashboard**: Use Socket.IO to push live metrics to connected clients
 2. **Alert System**: Notify users when APIs exceed thresholds
-3. **Rate Limit Enforcement**: Implement actual rate limiting based on API configuration
+3. **Rate Limiting Strategy**: Add advanced policies (burst controls, sliding windows)
 4. **API Key Rotation**: Scheduled key expiration and rotation
 5. **Team Management**: Enhanced organization features with permissions
 6. **Webhook Integration**: Allow APIs to send usage data via webhooks
@@ -802,5 +811,5 @@ For issues or questions, please refer to the project repository or contact the d
 
 ---
 
-**Last Updated:** March 6, 2026
+**Last Updated:** March 7, 2026
 **API Version:** 1.0.0
