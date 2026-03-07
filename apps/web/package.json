@@ -13,6 +13,7 @@
   "dependencies": {
     "@clerk/nextjs": "^6.39.0",
     "@repo/ui": "workspace:*",
+    "bullmq": "^5.70.4",
     "next": "16.1.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
