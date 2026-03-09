@@ -56,6 +56,8 @@ Body: { endpoint, status, response_time }
 
 Notes:
 - Enforces Redis-backed per-API `rate_limit`
+- Enqueues usage jobs to BullMQ queue `usage-events`
+- Worker persists usage logs asynchronously with retries and DLQ fallback
 - Returns `429` when the limit is exceeded
 
 ### Analytics
@@ -175,6 +177,20 @@ Socket.IO server available at same port:
 io.on('connection', (socket) => {
   // Client connected
 })
+
+socket.on('api_usage', (event) => {
+  // Usage event payload from tracking pipeline
+})
 ```
 
 CORS origin: `http://localhost:3000`
+
+---
+
+## Queueing (BullMQ)
+
+- **Primary queue**: `usage-events`
+- **Job name**: `log-usage`
+- **Retries**: `attempts=5`
+- **Backoff**: exponential, base delay `1000ms`
+- **DLQ**: `usage-events-dlq` for exhausted jobs

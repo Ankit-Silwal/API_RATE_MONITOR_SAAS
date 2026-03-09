@@ -20,6 +20,7 @@ A robust Node.js backend service for monitoring API usage, tracking performance 
 - 👥 **Multi-tenant**: Organization and team management
 - 🔑 **API Key Management**: Secure key generation and validation
 - 📊 **Usage Tracking**: Log and monitor API requests
+- 📨 **Async Usage Ingestion**: BullMQ queue + worker for non-blocking writes
 - 📈 **Analytics**: Real-time statistics and performance metrics
 - ⚡ **WebSocket Support**: Ready for real-time updates
 - 🗄️ **PostgreSQL**: Robust data persistence
@@ -32,6 +33,7 @@ A robust Node.js backend service for monitoring API usage, tracking performance 
 - **Framework**: Express.js
 - **Database**: PostgreSQL
 - **Cache**: Redis
+- **Queue**: BullMQ
 - **Auth**: Clerk
 - **WebSocket**: Socket.IO
 - **Security**: bcrypt for password hashing
@@ -102,31 +104,37 @@ Comprehensive documentation is available in the following files:
 
 ```
 apps/api/
-├── index.ts                    # Application entry point
-├── app.ts                      # Express app configuration
-├── routes.ts                   # Route registration
-├── package.json
-├── tsconfig.json
-└── src/
-    ├── config/
-    │   ├── db.ts              # PostgreSQL configuration
-    │   └── redis.ts           # Redis configuration
-    ├── middleware/
-    │   └── auth.ts            # Authentication middleware
-    ├── modules/
-    │   ├── auth/              # User authentication
-    │   ├── organization/      # Organization management
-    │   └── api/               # API monitoring core
-    │       ├── api.*          # API CRUD
-    │       ├── apiKey.*       # Key generation
-    │       ├── track.*        # Usage tracking
-    │       └── analytics.*    # Metrics & analytics
-    ├── types/
-    │   └── express.d.ts       # TypeScript definitions
-    ├── utils/
-    │   ├── generateApiKeys.ts # Key generation utility
-    │   └── hashApiKeys.ts     # Hashing utility
-    └── socket.ts              # WebSocket configuration
+|-- index.ts                    # Application entry point
+|-- app.ts                      # Express app configuration
+|-- routes.ts                   # Route registration
+|-- package.json
+|-- tsconfig.json
+`-- src/
+      |-- config/
+      |   |-- db.ts               # PostgreSQL configuration
+      |   |-- redis.ts            # Redis configuration
+      |   |-- queue.ts            # BullMQ queue + shared connection
+      |   `-- deadLetterQueue.ts  # Dead-letter queue for exhausted jobs
+      |-- middleware/
+      |   `-- auth.ts             # Authentication middleware
+      |-- modules/
+      |   |-- auth/               # User authentication
+      |   |-- organization/       # Organization management
+      |   `-- api/                # API monitoring core
+      |       |-- api.*           # API CRUD
+      |       |-- apiKey.*        # Key generation
+      |       |-- track.*         # Usage tracking
+      |       `-- analytics.*     # Metrics & analytics
+      |-- types/
+      |   `-- express.d.ts        # TypeScript definitions
+      |-- utils/
+      |   |-- generateApiKeys.ts  # Key generation utility
+      |   `-- hashApiKeys.ts      # Hashing utility
+      |-- services/
+      |   `-- queueProducer.ts    # Enqueues usage events
+      |-- worker/
+      |   `-- usageWorker.ts      # Persists usage events from BullMQ
+      `-- socket.ts               # WebSocket configuration
 ```
 
 ## 💻 Development
@@ -236,6 +244,16 @@ The system tracks:
 - **Endpoint Usage**: Request distribution across endpoints
 - **Time Series**: Requests per minute over time
 
+## 📨 Usage Ingestion Pipeline
+
+`POST /api/track` writes usage data asynchronously:
+
+1. Validate and authenticate API key
+2. Enforce Redis-backed API rate limit
+3. Enqueue usage event to BullMQ (`usage-events`)
+4. Worker consumes jobs and inserts rows into `api_usage_logs`
+5. Failed jobs retry with exponential backoff, then move to DLQ (`usage-events-dlq`)
+
 ## 🔮 Roadmap
 
 - [ ] Add Redis caching layer
@@ -251,7 +269,7 @@ The system tracks:
 ## 🐛 Known Issues
 
 1. **Authentication bypass in development**: Token verification is currently commented out
-2. **Redis usage is partial**: Currently used for rate limiting but not for caching
+2. **Redis usage is partial**: Used for rate limiting and BullMQ transport, but not yet for response/query caching
 3. **API key management**: Cannot list or revoke keys yet
 
 See [BACKEND_DOCUMENTATION.md](./BACKEND_DOCUMENTATION.md#known-issues--todos) for complete list and production checklist.
@@ -298,3 +316,4 @@ For questions or issues:
 ---
 
 **Built with ❤️ for developers who need reliable API monitoring**
+

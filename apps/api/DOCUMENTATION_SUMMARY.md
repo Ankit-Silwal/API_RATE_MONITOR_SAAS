@@ -33,6 +33,7 @@ Comprehensive backend documentation has been created for the API Rate Monitor Sa
 **Contents**:
 - Backend features overview
 - Tech stack details
+- BullMQ queue + worker ingestion overview
 - Installation instructions
 - Project structure
 - Available scripts
@@ -67,6 +68,7 @@ Comprehensive backend documentation has been created for the API Rate Monitor Sa
 - Error handling patterns
 - Security features in depth
 - WebSocket configuration
+- Queue architecture (producer, worker, retries, DLQ)
 - Utility functions documentation
 - Known issues and production checklist
 
@@ -104,6 +106,7 @@ Comprehensive backend documentation has been created for the API Rate Monitor Sa
 - Environment variables list
 - Database tables list
 - API key format explanation
+- BullMQ queue quick reference (`usage-events`, `usage-events-dlq`)
 - Metrics explanation
 
 **Audience**: Developers needing quick endpoint lookup, integration developers
@@ -134,6 +137,7 @@ Comprehensive backend documentation has been created for the API Rate Monitor Sa
   - Time-series data model
   - Multi-tenant architecture
   - Socket.IO integration
+  - BullMQ asynchronous ingestion pipeline
 - Data flow diagrams for key operations
 - Code organization principles
 - Database design principles
@@ -362,5 +366,12 @@ Please open an issue or submit a pull request to improve the documentation!
 
 ---
 
-**Last Updated**: March 6, 2026
+**Last Updated**: March 9, 2026
 **Documentation Version**: 1.0.0
+
+## 📝 Recent Updates (March 9, 2026)
+
+- ✅ Documented BullMQ usage ingestion pipeline (`usage-events` queue + worker)
+- ✅ Added retry, exponential backoff, and DLQ behavior details
+- ✅ Updated architecture and tracking flow for async queue-based writes
+

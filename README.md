@@ -15,7 +15,8 @@ This is a Turborepo monorepo containing the following applications and packages:
 - **`api`**: Node.js/Express backend API server
   - Authentication with Clerk
   - PostgreSQL database
-  - Redis for caching
+  - Redis for rate limiting + BullMQ queue backend
+  - BullMQ worker and dead-letter queue for resilient usage ingestion
   - Socket.IO for real-time updates
   - [📖 View Backend Documentation](./apps/api/README.md)
   
@@ -47,10 +48,11 @@ This is a Turborepo monorepo containing the following applications and packages:
 - 👥 **Multi-tenant Support**: Organization and team management
 - 🔑 **API Key Management**: Generate and manage secure API keys
 - 📊 **Usage Tracking**: Real-time API usage logging
+- 📨 **Async Ingestion Pipeline**: BullMQ queue + worker + retries + DLQ
 - 📈 **Analytics Dashboard**: Performance metrics and insights
 - ⚡ **Real-time Updates**: WebSocket-based live data
 - 🗄️ **Robust Storage**: PostgreSQL for reliability
-- 🚀 **High Performance**: Redis caching layer
+- 🚀 **High Performance**: Redis-backed rate limiting and queue transport
 
 ## 🛠 Tech Stack
 
@@ -59,6 +61,7 @@ This is a Turborepo monorepo containing the following applications and packages:
 - Express.js
 - PostgreSQL
 - Redis
+- BullMQ
 - Socket.IO
 - Clerk
 - bcrypt

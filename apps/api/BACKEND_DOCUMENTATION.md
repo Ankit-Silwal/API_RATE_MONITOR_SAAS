@@ -10,6 +10,7 @@ This is the backend API for the API Rate Monitor SaaS application. It provides e
 - **Framework**: Express.js
 - **Database**: PostgreSQL
 - **Cache**: Redis
+- **Queue**: BullMQ
 - **WebSocket**: Socket.IO
 - **Authentication**: Clerk
 - **Password Hashing**: bcrypt
@@ -25,11 +26,13 @@ apps/api/
 ├── app.ts                # Express app configuration
 ├── routes.ts             # Route registration
 └── src/
-    ├── config/           # Database and Redis configuration
+  ├── config/           # Database, Redis, and queue configuration
     ├── middleware/       # Authentication middleware
     ├── modules/          # Feature modules
+  ├── services/         # Queue producers and domain services
     ├── types/            # TypeScript type definitions
     ├── utils/            # Utility functions
+  ├── worker/           # BullMQ workers
     └── socket.ts         # WebSocket configuration
 ```
 
@@ -132,6 +135,19 @@ Redis client for caching and session management:
 - Connects on application startup
 - Provides event handlers for errors and ready states
 - Singleton pattern for client access
+
+### Queue Configuration (`src/config/queue.ts`)
+
+BullMQ queue setup for asynchronous usage ingestion:
+- Queue name: `usage-events`
+- Connection source: `REDIS_URL`
+- Shared connection object reused by queue and worker
+
+### Dead Letter Queue (`src/config/deadLetterQueue.ts`)
+
+Failed jobs that exhaust retry attempts are moved to:
+- Queue name: `usage-events-dlq`
+- Job payload includes original event, error message, and failure timestamp
 
 ## Authentication
 
@@ -380,7 +396,8 @@ Logs API usage for analytics.
 
 **Notes:**
 - Uses API-key authentication for tracking (no bearer token required)
-- Enforces Redis-backed per-API `rate_limit` before inserting usage logs
+- Enforces Redis-backed per-API `rate_limit` before queueing usage logs
+- Writes are asynchronous via BullMQ worker processing
 
 **Request Body:**
 ```json
@@ -417,8 +434,9 @@ Logs API usage for analytics.
 2. Splits key into prefix and secret
 3. Looks up key by prefix
 4. Verifies secret with bcrypt
-5. Enforces API `rate_limit` with Redis before logging
-6. Logs usage to database
+5. Enforces API `rate_limit` with Redis
+6. Enqueues usage event to BullMQ (`usage-events`)
+7. Worker persists usage event to database
 
 ---
 
@@ -531,6 +549,33 @@ io.emit('event', data)
 - Real-time dashboard updates
 - Live API usage notifications
 - Instant alert broadcasting
+
+---
+
+## Queueing & Background Processing
+
+### Producer (`src/services/queueProducer.ts`)
+
+`enqueueUsageEvent()` publishes jobs to BullMQ:
+- Queue: `usage-events`
+- Job name: `log-usage`
+- Retries: `attempts = 5`
+- Backoff: exponential (`delay = 1000ms`)
+- Cleanup: `removeOnComplete = true`, `removeOnFail = false`
+
+### Worker (`src/worker/usageWorker.ts`)
+
+`usageWorker` consumes `usage-events` jobs and:
+1. Inserts events into `api_usage_logs`
+2. Emits `api_usage` via Socket.IO
+
+Worker settings:
+- `concurrency: 10`
+- Shared Redis connection from `src/config/queue.ts`
+
+Failure handling:
+- Failed jobs are retried automatically by BullMQ
+- When attempts are exhausted, the worker writes a `failed-usage-event` job to `usage-events-dlq`
 
 ---
 
@@ -763,9 +808,9 @@ Starts the server with:
 
 2. **No API Key Listing**: Cannot retrieve or revoke existing API keys.
 
-3. **Limited WebSocket Usage**: Socket.IO is configured but not actively used for real-time features.
+3. **Limited WebSocket Consumption**: Backend emits `api_usage` events, but dashboard-level real-time consumption is still limited.
 
-4. **Redis Used Minimally**: Redis currently backs rate limiting but is not yet used for caching.
+4. **Redis Used Partially**: Redis backs rate limiting and BullMQ queues, but is not yet used for response/query caching.
 
 ### Production Checklist
 
@@ -811,5 +856,5 @@ For issues or questions, please refer to the project repository or contact the d
 
 ---
 
-**Last Updated:** March 7, 2026
+**Last Updated:** March 9, 2026
 **API Version:** 1.0.0

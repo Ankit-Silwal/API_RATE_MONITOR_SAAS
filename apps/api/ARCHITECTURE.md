@@ -211,7 +211,8 @@ users ←→ organization_members ←→ organizations
 - WebSocket-based communication
 
 **Current State:**
-- Configured but not actively used
+- Basic usage event emitting is implemented (`api_usage`)
+- Frontend subscription/visualization is still evolving
 - Ready for future real-time features
 
 **Pattern:**
@@ -276,9 +277,28 @@ bcrypt.compare(secret, hash)
      ↓
 Redis rate check using API rate_limit
   ↓
-If allowed: Insert usage log
+If allowed: Enqueue BullMQ job (usage-events)
+  ↓
+usageWorker consumes job
+  ↓
+Insert usage log into api_usage_logs
      ↓
 Response: Usage logged
+```
+
+### Queue Processing Flow (BullMQ)
+```
+enqueueUsageEvent()
+  ↓
+Queue: usage-events (job: log-usage)
+  ↓
+Retry policy: attempts=5, exponential backoff (1s base)
+  ↓
+usageWorker (concurrency=10)
+  ↓
+Insert into PostgreSQL + emit Socket.IO event
+  ↓
+On final failure: move to usage-events-dlq
 ```
 
 ### Analytics Flow
@@ -443,6 +463,16 @@ async function createApi(userId, name, baseUrl, rateLimit) {
 - Non-blocking operations
 - Better resource utilization
 - Handles concurrent requests
+
+### 5. Asynchronous Ingestion with BullMQ
+
+The tracking endpoint responds quickly by queueing write work instead of writing synchronously.
+
+**Benefits:**
+- Better p95/p99 latency for `POST /api/track`
+- Controlled write throughput via worker concurrency
+- Built-in retries for transient failures
+- Dead-letter queue for durable failure inspection
 
 ---
 
@@ -714,11 +744,11 @@ const config = {
 - [ ] Implement database migrations (TypeORM/Knex)
 - [ ] Add API documentation (Swagger)
 - [ ] Set up comprehensive testing suite
-- [ ] Implement background job processing (Bull)
+- [x] Implement background job processing (BullMQ)
 
 ### Long Term
 - [ ] Microservices architecture (if needed)
-- [ ] Event-driven architecture with message queues
+- [x] Event-driven ingestion with BullMQ queues
 - [ ] GraphQL API option
 - [ ] Implement CQRS pattern for analytics
 
